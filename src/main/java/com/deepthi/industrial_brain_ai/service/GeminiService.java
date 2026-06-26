@@ -47,7 +47,7 @@ public String askQuestion(String document, String question) {
             "The document does not contain this information."
             """
             .formatted(document, question);
-
+    System.out.println("API Key = " + apiKey);    
     Client client = Client.builder()
             .apiKey(apiKey)
             .build();
