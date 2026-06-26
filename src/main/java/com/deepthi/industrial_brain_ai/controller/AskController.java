@@ -1,5 +1,6 @@
 package com.deepthi.industrial_brain_ai.controller;
 
+import com.deepthi.industrial_brain_ai.dto.QuestionRequest;
 import com.deepthi.industrial_brain_ai.service.GeminiService;
 import com.deepthi.industrial_brain_ai.service.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/ai")
-public class AiController {
+public class AskController {
 
     @Autowired
     private PdfService pdfService;
@@ -16,26 +17,26 @@ public class AiController {
     @Autowired
     private GeminiService geminiService;
 
-    @GetMapping("/summary")
-    public ResponseEntity<String> summarize(
-            @RequestParam String fileName) {
+    @PostMapping("/ask")
+    public ResponseEntity<String> askQuestion(
+            @RequestBody QuestionRequest request) {
 
         try {
 
             String filePath =
                     System.getProperty("user.dir")
                             + "/uploads/"
-                            + fileName;
+                            + request.getFileName();
 
-            String text = pdfService.extractText(filePath);
+            String document =
+                    pdfService.extractText(filePath);
 
-            String prompt =
-                    "Summarize the following document in simple bullet points:\n\n"
-                            + text;
+            String answer =
+                    geminiService.askQuestion(
+                            document,
+                            request.getQuestion());
 
-            String summary = geminiService.askGemini(prompt);
-
-            return ResponseEntity.ok(summary);
+            return ResponseEntity.ok(answer);
 
         } catch (Exception e) {
 
