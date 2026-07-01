@@ -11,7 +11,24 @@ import {
 } from "react-icons/fa";
 
 function Sidebar() {
+
+  const scrollToSection = (id) => {
+
+    const section = document.getElementById(id);
+
+    if (section) {
+
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    }
+
+  };
+
   return (
+
     <div className="sidebar">
 
       <div className="logo-section">
@@ -29,37 +46,58 @@ function Sidebar() {
 
       <div className="menu">
 
-        <div className="menu-item active">
+        <div
+          className="menu-item active"
+          onClick={() => scrollToSection("dashboard")}
+        >
           <FaHome />
           <span>Dashboard</span>
         </div>
 
-        <div className="menu-item">
+        <div
+          className="menu-item"
+          onClick={() => scrollToSection("documents")}
+        >
           <FaFolderOpen />
           <span>Documents</span>
         </div>
 
-        <div className="menu-item">
+        <div
+          className="menu-item"
+          onClick={() => scrollToSection("assets")}
+        >
           <FaIndustry />
           <span>Assets</span>
         </div>
 
-        <div className="menu-item">
+        <div
+          className="menu-item"
+          onClick={() => scrollToSection("graph")}
+        >
           <FaProjectDiagram />
           <span>Knowledge Graph</span>
         </div>
 
-        <div className="menu-item">
+        <div
+          className="menu-item"
+          onClick={() => scrollToSection("compliance")}
+        >
           <FaClipboardCheck />
           <span>Compliance</span>
         </div>
 
-        <div className="menu-item">
+        <div
+          className="menu-item"
+          onClick={() => scrollToSection("analytics")}
+        >
           <FaChartLine />
           <span>Analytics</span>
         </div>
 
-        <div className="menu-item">
+        <div
+          className="menu-item"
+          onClick={() => scrollToSection("copilot")}
+        >
           <FaRobot />
           <span>AI Copilot</span>
         </div>
@@ -87,7 +125,9 @@ function Sidebar() {
       </div>
 
     </div>
+
   );
+
 }
 
 export default Sidebar;

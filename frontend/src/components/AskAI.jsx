@@ -1,17 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FaRobot,
   FaPaperPlane,
-  FaSpinner,
-  FaUserCircle
+  FaSpinner
 } from "react-icons/fa";
 import api from "../services/api";
 
 function AskAI({ fileName }) {
 
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+
+  const [messages, setMessages] = useState([
+    {
+      type: "bot",
+      text: "👋 Welcome! I'm your Industrial AI Copilot. Ask me anything about your uploaded industrial documents."
+    }
+  ]);
+
   const [loading, setLoading] = useState(false);
+
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+
+    chatEndRef.current?.scrollIntoView({
+      behavior: "smooth"
+    });
+
+  }, [messages]);
 
   const askQuestion = async () => {
 
@@ -21,9 +37,20 @@ function AskAI({ fileName }) {
     }
 
     if (!question.trim()) {
-      alert("Enter a question.");
       return;
     }
+
+    const currentQuestion = question;
+
+    setMessages(prev => [
+      ...prev,
+      {
+        type: "user",
+        text: currentQuestion
+      }
+    ]);
+
+    setQuestion("");
 
     setLoading(true);
 
@@ -32,15 +59,27 @@ function AskAI({ fileName }) {
       const response = await api.post("/ai/ask", {
 
         fileName,
-        question
+        question: currentQuestion
 
       });
 
-      setAnswer(response.data);
+      setMessages(prev => [
+        ...prev,
+        {
+          type: "bot",
+          text: response.data
+        }
+      ]);
 
     } catch (err) {
 
-      alert("Failed to get AI response.");
+      setMessages(prev => [
+        ...prev,
+        {
+          type: "bot",
+          text: "❌ Failed to get AI response."
+        }
+      ]);
 
     } finally {
 
@@ -63,9 +102,7 @@ function AskAI({ fileName }) {
           <h3>Industrial AI Copilot</h3>
 
           <p>
-
             Ask questions about uploaded industrial documents
-
           </p>
 
         </div>
@@ -74,38 +111,54 @@ function AskAI({ fileName }) {
 
       <div className="chat-window">
 
-        <div className="bot-message">
-
-          🤖 Welcome! Ask me about maintenance, SOPs,
-          equipment, compliance or inspection reports.
-
-        </div>
-
         {
 
-          question &&
+          messages.map((msg,index)=>(
 
-          <div className="user-message">
+            <div
+              key={index}
+              className={
+                msg.type==="user"
+                ? "user-message"
+                : "bot-message"
+              }
+            >
 
-            <FaUserCircle/>
+              {
 
-            <span>{question}</span>
+                msg.type==="user"
 
-          </div>
+                ?
+
+                <>👤 {msg.text}</>
+
+                :
+
+                <>🤖 {msg.text}</>
+
+              }
+
+            </div>
+
+          ))
 
         }
 
         {
 
-          answer &&
+          loading &&
 
           <div className="bot-message">
 
-            🤖 {answer}
+            <FaSpinner className="spin"/>
+
+            {" "}Thinking...
 
           </div>
 
         }
+
+        <div ref={chatEndRef}></div>
 
       </div>
 
@@ -115,11 +168,23 @@ function AskAI({ fileName }) {
 
           rows="3"
 
-          placeholder="Example: What maintenance is recommended for Pump P201?"
+          placeholder="Ask about maintenance, SOPs, inspections..."
 
           value={question}
 
           onChange={(e)=>setQuestion(e.target.value)}
+
+          onKeyDown={(e)=>{
+
+            if(e.key==="Enter" && !e.shiftKey){
+
+              e.preventDefault();
+
+              askQuestion();
+
+            }
+
+          }}
 
         />
 
@@ -131,17 +196,7 @@ function AskAI({ fileName }) {
 
         >
 
-          {
-
-            loading ?
-
-            <FaSpinner className="spin"/>
-
-            :
-
-            <FaPaperPlane/>
-
-          }
+          <FaPaperPlane/>
 
         </button>
 
